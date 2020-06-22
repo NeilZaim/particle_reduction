@@ -13,6 +13,7 @@ import Algorithms.Energy_conservative_thinning_algorithm as Energy_conservative_
 import Algorithms.k_means_clustering_algorithm as k_means_clustering_algorithm
 import Algorithms.k_means_merge_average_algorithm as k_means_merge_average_algorithm
 import Algorithms.Voronoi_algorithm as Voronoi_algorithm
+import Algorithms.Voronoi_algorithm_prop as Voronoi_algorithm_prop
 import Algorithms.Leveling_thinning_algorithm as Leveling_thinning_algorithm
 import Algorithms.Voronoi_probabilistic_algorithm as Voronoi_probabilistic_algorithm
 
@@ -47,6 +48,8 @@ class Algorithm:
                                                                                    parameters.max_iterations, parameters.tolerance)
         if type == "voronoi":
             return Voronoi_algorithm.VoronoiMergingAlgorithm(parameters.tolerance)
+        if type == "voronoi_prop":
+            return Voronoi_algorithm_prop.VoronoiMergingAlgorithm(parameters.tolerance)
         if type == "voronoi_prob":
             voronoi_parameters = Voronoi_probabilistic_algorithm.Voronoi_probabilistic_algorithm_parameters\
                 (parameters.reduction_percent, parameters.ratio_left_particles)
@@ -881,7 +884,7 @@ def voronoi_prob_algorithm(hdf_file_name, hdf_file_reduction_name, reduction_per
         (reduction_percent, ratio_left_particles)
     base_reduction_function(hdf_file_name, hdf_file_reduction_name, "voronoi_prob", voronoi_parameters)
 
-    
+
 def voronoi_algorithm(hdf_file_name, hdf_file_reduction_name, momentum_tolerance, position_tolerance):
 
     tolerance = [momentum_tolerance, position_tolerance]
@@ -889,6 +892,12 @@ def voronoi_algorithm(hdf_file_name, hdf_file_reduction_name, momentum_tolerance
     parameters = Voronoi_algorithm.VoronoiMergingAlgorithmParameters(tolerance)
     base_reduction_function(hdf_file_name, hdf_file_reduction_name, "voronoi", parameters)
 
+def voronoi_algorithm_prop(hdf_file_name, hdf_file_reduction_name, momentum_tolerance, position_tolerance):
+
+    tolerance = [momentum_tolerance, position_tolerance]
+
+    parameters = Voronoi_algorithm_prop.VoronoiMergingAlgorithmParameters(tolerance)
+    base_reduction_function(hdf_file_name, hdf_file_reduction_name, "voronoi_prop", parameters)
 
 def iterate_patches(data, weights, num_particles_offset, algorithm):
 
@@ -949,6 +958,9 @@ if __name__ == "__main__":
     parser.add_argument("-momentum_tol", metavar='tolerance_momentum', type=float,
                         help="tolerance of momentum ( in SI ), used in voronoi algorithm")
 
+    parser.add_argument("-momentum_tol_prop", metavar='tolerance_momentum', type=float,
+                        help="tolerance of momentum (normalized), used in voronoi prop algorithm")
+
     parser.add_argument("-position_lol", metavar='tolerance_position', type=float,
                         help="tolerance of position( in SI ), used in voronoi algorithm")
 
@@ -963,6 +975,9 @@ if __name__ == "__main__":
         tolerance = [args.momentum_tol, args.position_lol]
         parameters = Voronoi_algorithm.VoronoiMergingAlgorithmParameters(tolerance)
         voronoi_algorithm(args.hdf, args.hdf_re, args.momentum_tol, args.position_lol)
+
+    elif args.algorithm == 'voronoi_prop':
+        voronoi_algorithm_prop(args.hdf, args.hdf_re, args.momentum_tol, args.position_lol)
 
     elif args.algorithm == 'voronoi_prob':
         parameters = Voronoi_probabilistic_algorithm.Voronoi_probabilistic_algorithm_parameters(args.reduction_percent, args.divide_particles)
